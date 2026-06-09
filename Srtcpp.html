@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catatan Perkembangan Pasien Terintegrasi Rawat Jalan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        input[type="text"], select, textarea {
+            border-bottom: 1px dotted #000;
+            outline: none;
+            background: transparent;
+        }
+        input[type="text"]:focus {
+            border-bottom: 1px solid #10b981;
+        }
+        .table-bordered th, .table-bordered td {
+            border: 1px solid #000;
+        }
+        
+        /* CSS Khusus Cetak / Simpan PDF (Print Styles) */
+        @media print {
+            body {
+                background-color: #fff;
+                padding: 0;
+                margin: 0;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .print-container {
+                border: none !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                max-width: 100% !important;
+            }
+            input::placeholder, textarea::placeholder {
+                color: transparent !important;
+            }
+            textarea, input[type="text"] {
+                border-bottom: 1px dotted #000 !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-4 md:p-6">
+
+    <div class="max-w-4xl mx-auto mb-4 flex justify-end space-x-3 no-print">
+        <input type="file" id="logoInput" accept="image/*" class="hidden" onchange="previewLogo(event)">
+        
+        <button onclick="document.getElementById('logoInput').click()" class="bg-gray-600 hover:bg-gray-700 text-white font-medium text-sm py-2 px-4 rounded shadow flex items-center transition duration-200">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            Ganti Logo
+        </button>
+
+        <button onclick="window.print()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-sm py-2 px-5 rounded shadow flex items-center transition duration-200">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+            </svg>
+            Cetak / Simpan PDF
+        </button>
+    </div>
+
+    <div class="max-w-4xl mx-auto bg-white p-6 border border-black shadow-md print-container">
+        
+        <div class="flex items-center justify-between border-b-2 border-black pb-2 mb-4">
+            <div id="logoContainer" class="w-14 h-14 flex items-center justify-center border border-green-600 p-1">
+                <svg id="defaultLogo" class="w-full h-full text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                    <path d="M12 2v20M2 12h20" />
+                </svg>
+                <img id="customLogo" class="w-full h-full object-contain hidden" alt="Logo Puskesmas">
+            </div>
+            
+            <div class="text-center flex-1 mx-4">
+                <h1 class="text-base font-bold tracking-wide leading-tight">CATATAN PERKEMBANGAN PASIEN<br>TERINTEGRASI RAWAT JALAN</h1>
+                <h2 class="text-sm font-bold">UPTD PUSKESMAS SAMPANAHAN</h2>
+            </div>
+            
+            <div class="text-right text-xs">
+                <label class="block font-semibold mb-0.5">NO RM:</label>
+                <input type="text" class="w-24 text-center p-0.5 border border-gray-400 text-xs bg-gray-50">
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1.5 text-xs mb-4">
+            <div class="space-y-1.5">
+                <div class="flex"><span class="w-28 flex-shrink-0">NAMA</span><span class="mr-1.5">:</span><input type="text" class="flex-1 text-xs"></div>
+                <div class="flex"><span class="w-28 flex-shrink-0">TANGGAL LAHIR</span><span class="mr-1.5">:</span><input type="text" class="flex-1 text-xs"></div>
+                <div class="flex items-center"><span class="w-28 flex-shrink-0">JENIS KELAMIN</span><span class="mr-1.5">:</span>
+                    <label class="mr-3 text-xs flex items-center"><input type="radio" name="jk" class="mr-1"> L</label>
+                    <label class="text-xs flex items-center"><input type="radio" name="jk" class="mr-1"> P</label>
+                </div>
+                <div class="flex text-red-600 font-bold"><span class="w-28 flex-shrink-0">RIW. ALERGI OBAT</span><span class="mr-1.5">:</span><input type="text" class="flex-1 text-xs border-red-300"></div>
+                <div class="flex"><span class="w-28 flex-shrink-0">NAMA SUAMI/ISTRI</span><span class="mr-1.5">:</span><input type="text" class="flex-1 text-xs"></div>
+                <div class="flex"><span class="w-28 flex-shrink-0">NAMA ORANG TUA</span><span class="mr-1.5">:</span><input type="text" class="flex-1 text-xs"></div>
+                <div class="flex items-center text-[11px]"><span class="w-28 flex-shrink-0 text-xs">STATUS PERKAWINAN</span><span class="mr-1.5">:</span>
+                    <label class="mr-1.5"><input type="radio" name="status" class="mr-0.5"> 1. KAWIN</label>
+                    <label class="mr-1.5"><input type="radio" name="status" class="mr-0.5"> 2. BELUM KAWIN</label>
+                    <label><input type="radio" name="status" class="mr-0.5"> 3. JANDA/DUDA</label>
+                </div>
+                <div class="flex items-start text-[11px]"><span class="w-28 flex-shrink-0 text-xs pt-0.5">JENIS KUNJUNGAN</span><span class="mr-1.5 pt-0.5">:</span>
+                    <div class="flex-1 flex flex-col space-y-0.5">
+                        <label><input type="checkbox" class="mr-1"> 1. BPJS PBI/NON PBI</label>
+                        <label><input type="checkbox" class="mr-1"> 2. UMUM</label>
+                        <div class="flex items-center"><input type="checkbox" class="mr-1"> 3. LAIN-LAIN : <input type="text" class="flex-1 ml-1 text-xs"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-1.5">
+                <div class="flex"><span class="w-24 flex-shrink-0">ALAMAT</span><span class="mr-1.5">:</span><input type="text" class="flex-1 text-xs"></div>
+                <div class="flex"><span class="w-24 flex-shrink-0">NIK</span><span class="mr-1.5">:</span><input type="text" class="flex-1 text-xs"></div>
+                <div class="flex"><span class="w-24 flex-shrink-0">PEKERJAAN</span><span class="mr-1.5">:</span><input type="text" class="flex-1 text-xs"></div>
+                <div class="flex"><span class="w-24 flex-shrink-0">AGAMA</span><span class="mr-1.5">:</span><input type="text" class="flex-1 text-xs"></div>
+                <div class="flex"><span class="w-24 flex-shrink-0">PENDIDIKAN</span><span class="mr-1.5">:</span><input type="text" class="flex-1 text-xs"></div>
+                <div class="flex"><span class="w-24 flex-shrink-0">SUKU</span><span class="mr-1.5">:</span><input type="text" class="flex-1 text-xs"></div>
+                <div class="text-right font-bold text-xs pt-2 tracking-wider">AP / NP / PN</div>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-xs table-bordered border-collapse text-left">
+                <thead>
+                    <tr class="bg-gray-50 text-center font-bold text-[11px] uppercase tracking-wide">
+                        <th class="p-1.5 w-20">TANGGAL UMUR</th>
+                        <th class="p-1.5 w-1/2">ANAMNESA, PEMERIKSAAN FISIK, PEMERIKSAAN PENUNJANG, DIAGNOSA</th>
+                        <th class="p-1.5 w-40">EDUKASI, DAN KAJIAN</th>
+                        <th class="p-1.5 w-40">TERAPI</th>
+                        <th class="p-1.5 w-24">TTD & NAMA</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="align-top">
+                        <td class="p-1.5 space-y-3">
+                            <input type="text" class="w-full p-0.5 text-center border border-gray-300 text-xs" placeholder="">
+                            <div class="border border-gray-300 p-1.5 text-center">
+                                <label class="block text-[10px] font-semibold text-gray-500 mb-0.5">UMUR:</label>
+                                <input type="text" class="w-full text-center text-xs">
+                            </div>
+                        </td>
+
+                        <td class="p-1.5 space-y-2.5 text-xs">
+                            <div>
+                                <span class="font-bold">S :</span>
+                                <textarea class="w-full h-10 border border-gray-200 p-1 mt-0.5 text-xs resize-none"></textarea>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-2">
+                                <div class="flex items-center"><span class="font-bold mr-1">RPD:</span><input type="text" class="flex-1 text-xs"></div>
+                                <div class="flex items-center"><span class="font-bold mr-1">RS :</span><input type="text" class="flex-1 text-xs"></div>
+                            </div>
+
+                            <div class="border-t pt-1.5 space-y-1.5">
+                                <span class="font-bold">O :</span>
+                                <div class="grid grid-cols-2 gap-x-3 gap-y-1 text-[11px]">
+                                    <div class="flex items-center">TD: <input type="text" class="w-12 mx-0.5 text-center text-xs"> / <input type="text" class="w-12 mx-0.5 text-center text-xs"> mmHg</div>
+                                    <div class="flex items-center">N: <input type="text" class="w-12 mx-0.5 text-center text-xs"> x/mnt</div>
+                                    <div class="flex items-center">RR: <input type="text" class="w-12 mx-0.5 text-center text-xs"> x/mnt</div>
+                                    <div class="flex items-center">S: <input type="text" class="w-12 mx-0.5 text-center text-xs"> °C</div>
+                                    <div class="flex items-center col-span-2">SpO2: <input type="text" class="flex-1 ml-1 text-xs"></div>
+                                    <div class="flex items-center col-span-2">K/L : <input type="text" class="flex-1 ml-1 text-xs"></div>
+                                </div>
+                            </div>
+
+                            <div class="pl-1.5 border-l border-gray-400 space-y-0.5 text-[11px]">
+                                <span class="font-bold text-gray-700 text-xs">Thorax</span>
+                                <div class="flex items-center"><span class="w-6">I</span><span>:</span><input type="text" class="flex-1 ml-1 text-xs"></div>
+                                <div class="flex items-center"><span class="w-6">Pa</span><span>:</span><input type="text" class="flex-1 ml-1 text-xs"></div>
+                                <div class="flex items-center"><span class="w-6">Pr</span><span>:</span><input type="text" class="flex-1 ml-1 text-xs"></div>
+                                <div class="flex items-center"><span class="w-6">A</span><span>:</span><input type="text" class="flex-1 ml-1 text-xs"></div>
+                            </div>
+
+                            <div class="pl-1.5 border-l border-gray-400 space-y-0.5 text-[11px]">
+                                <span class="font-bold text-gray-700 text-xs">Abdomen</span>
+                                <div class="flex items-center"><span class="w-6">I</span><span>:</span><input type="text" class="flex-1 ml-1 text-xs"></div>
+                                <div class="flex items-center"><span class="w-6">Pa</span><span>:</span><input type="text" class="flex-1 ml-1 text-xs"></div>
+                                <div class="flex items-center"><span class="w-6">Pr</span><span>:</span><input type="text" class="flex-1 ml-1 text-xs"></div>
+                                <div class="flex items-center"><span class="w-6">A</span><span>:</span><input type="text" class="flex-1 ml-1 text-xs"></div>
+                            </div>
+
+                            <div class="flex items-center"><span class="font-bold">Ekstremitas:</span><input type="text" class="flex-1 ml-1 text-xs"></div>
+
+                            <div class="border-t pt-1.5">
+                                <span class="font-bold">A (Assessment / Diagnosa):</span>
+                                <textarea class="w-full h-16 border border-gray-300 p-1 mt-0.5 text-xs resize-none bg-gray-50"></textarea>
+                            </div>
+                        </td>
+
+                        <td class="p-1.5 space-y-3 text-[11px]">
+                            <div>
+                                <span class="font-bold text-[11px] block mb-0.5">KAJIAN: GIZI/SANITASI</span>
+                                <textarea class="w-full h-28 border border-gray-300 p-1 text-xs resize-none"></textarea>
+                            </div>
+                            <div>
+                                <span class="font-bold text-[11px] block mb-0.5">RUJUKAN / PENUNJANG MEDIS</span>
+                                <textarea class="w-full h-28 border border-gray-300 p-1 text-xs resize-none"></textarea>
+                            </div>
+                        </td>
+
+                        <td class="p-1.5 text-[11px]">
+                            <span class="font-bold block mb-0.5">Rencana Terapi / Tindakan:</span>
+                            <textarea class="w-full h-[28rem] border border-gray-300 p-1 text-xs resize-none"></textarea>
+                        </td>
+
+                        <td class="p-1.5 text-center flex flex-col justify-between h-[30rem] text-[11px]">
+                            <div class="text-gray-500 pt-1 leading-tight">Nama Pemeriksa:</div>
+                            <div class="mt-auto pb-2">
+                                <div class="w-full border-b border-black mx-auto my-1.5"></div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <script>
+        function previewLogo(event) {
+            const input = event.target;
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    const defaultLogo = document.getElementById('defaultLogo');
+                    const customLogo = document.getElementById('customLogo');
+                    const logoContainer = document.getElementById('logoContainer');
+                    
+                    // Masukkan data gambar baru ke tag img
+                    customLogo.src = e.target.result;
+                    
+                    // Sembunyikan SVG default dan tampilkan Gambar kustom
+                    defaultLogo.classList.add('hidden');
+                    customLogo.classList.remove('hidden');
+                    
+                    // Hilangkan garis border hijau luar agar menyatu dengan logo baru (opsional)
+                    logoContainer.classList.remove('border-green-600');
+                    logoContainer.classList.add('border-transparent');
+                }
+                
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+
+</body>
+</html>
